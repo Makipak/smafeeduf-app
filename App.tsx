@@ -1,20 +1,20 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// file: App.tsx
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Impor Navigator yang sudah Anda buat
+import AuthNavigator from './src/navigation/authnavigator';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    // 1. SafeAreaProvider: Menangani area aman (notch, bar notifikasi) pada perangkat.
+    <SafeAreaProvider>
+      {/* 2. NavigationContainer: Wajib ada di root untuk mengelola status navigasi. */}
+      <NavigationContainer>
+        {/* 3. AuthNavigator: Stack yang berisi Login, Register, dan Forgot Password. */}
+        <AuthNavigator />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
