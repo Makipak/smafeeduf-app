@@ -20,7 +20,7 @@ interface LoginScreenProps {
 const { width } = Dimensions.get('window');
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => { // Menerima props 'navigation'
-  const [phone, setPhone] = useState('');
+  const [email, setMail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -44,11 +44,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => { // Menerim
 
         <View style={styles.formContainer}>
           <CustomInput
-            iconName="phone"
-            placeholder="Nomor Handphone"
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
+            iconName="mail"
+            placeholder="Alamat Email"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setMail}
           />
 
           <CustomInput

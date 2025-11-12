@@ -48,9 +48,9 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => { // M
 
         <View style={styles.formContainer}>
           {/* ... (Semua CustomInput lainnya) */}
-          <CustomInput iconName="phone" placeholder="Nomor Handphone" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
           <CustomInput iconName="mail" placeholder="Email" keyboardType="email-address" value={email} onChangeText={setEmail} />
           <CustomInput iconName="user" placeholder="Nama" value={name} onChangeText={setName} />
+          <CustomInput iconName="phone" placeholder="Nomor Handphone" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
           <CustomInput iconName="home" placeholder="Alamat" value={address} onChangeText={setAddress} />
           <CustomInput iconName="lock" placeholder="Password" isPassword={true} value={password} onChangeText={setPassword} passwordVisible={passwordVisible} onToggleVisibility={() => setPasswordVisible(!passwordVisible)} />
           <CustomInput iconName="lock" placeholder="Konfirmasi Password" isPassword={true} value={confirmPassword} onChangeText={setConfirmPassword} passwordVisible={confirmPasswordVisible} onToggleVisibility={() => setConfirmPasswordVisible(!confirmPasswordVisible)} />
