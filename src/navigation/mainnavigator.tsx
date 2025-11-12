@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Image, StyleSheet, View, Text } from 'react-native'; 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CompositeScreenProps } from '@react-navigation/native'; // Ditambahkan untuk typing lanjutan
 
 // 💡 PERBAIKAN IMPORT: Mengasumsikan nama komponen diexport sebagai default atau bernama
@@ -50,6 +51,7 @@ const ICONS = {
 
 // 1. Komponen Bottom Tab
 const MainTabs: React.FC = () => {
+    const insets = useSafeAreaInsets();
     return (
         <Tab.Navigator
             initialRouteName="Pond"
@@ -59,8 +61,8 @@ const MainTabs: React.FC = () => {
                 tabBarInactiveTintColor: '#ccc', 
                 tabBarStyle: {
                     backgroundColor: '#005930', 
-                    height: 60,
-                    paddingBottom: 5,
+                    height: 60 + insets.bottom,
+                    paddingBottom: 5 + insets.bottom,
                 },
             }}
         >

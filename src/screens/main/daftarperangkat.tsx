@@ -1,16 +1,22 @@
-// file: screens/main/DeviceListScreen.tsx
-
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Animated,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
-import { MainStackParamList } from '../../navigation/mainnavigator'; // Impor tipe Stack Anda
+import { MainStackParamList } from '../../navigation/mainnavigator';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
-// Definisikan tipe props untuk rute ini
-// Menerima pondId dan pondName dari navigasi
-type DeviceListScreenProps = StackScreenProps<MainStackParamList, 'DeviceList'>; 
+type DeviceListScreenProps = StackScreenProps<MainStackParamList, 'DeviceList'>;
 
 interface Device {
   id: number;
@@ -19,30 +25,53 @@ interface Device {
 }
 
 const DUMMY_DEVICES: Device[] = [
-  // Contoh perangkat, isActive: false sesuai dengan "Feeder 1" di gambar
-  { id: 1, name: 'Feeder 1', isActive: false }, 
-  { id: 2, name: 'Pompa Udara', isActive: true }, 
-  { id: 3, name: 'Sensor pH', isActive: true }, 
+  { id: 1, name: 'Feeder 1', isActive: false },
 ];
 
 const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }) => {
-  // Ambil data yang dilewatkan dari PondListScreen
-  const { pondId, pondName } = route.params; 
+  const { pondId, pondName } = route.params;
   const [devices, setDevices] = useState<Device[]>(DUMMY_DEVICES);
+  const [activeTab, setActiveTab] = useState<'perangkat' | 'pangan'>('perangkat');
+  const insets = useSafeAreaInsets();
+
+  // Animasi skala ikon untuk dua tab
+  const scalePerangkat = useRef(new Animated.Value(1.2)).current;
+  const scalePangan = useRef(new Animated.Value(1)).current;
+
+  const animateTab = (tab: 'perangkat' | 'pangan') => {
+    if (tab === 'perangkat') {
+      Animated.parallel([
+        Animated.spring(scalePerangkat, { toValue: 1.2, useNativeDriver: true }),
+        Animated.spring(scalePangan, { toValue: 1, useNativeDriver: true }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.spring(scalePerangkat, { toValue: 1, useNativeDriver: true }),
+        Animated.spring(scalePangan, { toValue: 1.2, useNativeDriver: true }),
+      ]).start();
+    }
+  };
 
   useEffect(() => {
-    // Log atau set judul header jika Anda menggunakan header bawaan React Navigation
     console.log(`Menampilkan perangkat untuk Kolam: ${pondName} (ID: ${pondId})`);
   }, [pondId, pondName]);
-  
+
   const handleAddDevice = () => {
     console.log("Menavigasi ke Tambah Perangkat untuk Kolam:", pondName);
-    // Logika penambahan perangkat baru
+  };
+
+  const handleTabPress = (tab: 'perangkat' | 'pangan') => {
+    setActiveTab(tab);
+    animateTab(tab);
+
+    if (tab === 'pangan') {
+      navigation.navigate('MainTabs', { screen: 'Food' });
+    }
   };
 
   const renderDeviceCard = (device: Device) => (
-    <TouchableOpacity 
-      key={device.id} 
+    <TouchableOpacity
+      key={device.id}
       style={styles.card}
       onPress={() => console.log('Buka detail perangkat', device.name)}
       activeOpacity={0.7}
@@ -53,9 +82,9 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
           {device.isActive ? 'Aktif' : 'Tidak Aktif'}
         </Text>
       </View>
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={(e) => {
-          e.stopPropagation(); // Mencegah klik card saat mengklik opsi
+          e.stopPropagation();
           console.log('Opsi Perangkat', device.name);
         }}
       >
@@ -66,48 +95,82 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      
-      {/* HEADER HIJAU GELAP */}
+      {/* HEADER */}
       <View style={styles.headerContainer}>
-        {/* Tambahkan tombol kembali jika diperlukan (tidak terlihat di gambar, tapi baik untuk UX) */}
-        {/* <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <MaterialCommunityIcons name="arrow-left" size={24} color="#fff" />
-        </TouchableOpacity> */}
         <Text style={styles.headerTitle}>Daftar Perangkat</Text>
-        {/* Menampilkan nama kolam yang dikunjungi sebagai subtitle */}
-        <Text style={styles.headerSubtitle}>{pondName || 'Kolam Detail'}</Text> 
+        <Text style={styles.headerSubtitle}>{pondName || 'Kolam Detail'}</Text>
       </View>
 
-      {/* BODY KONTEN */}
+      {/* BODY */}
       <View style={styles.bodyContainer}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {devices.map(renderDeviceCard)}
-          
-          {devices.length === 0 && (
-            <Text style={styles.noDeviceText}>Tidak ada perangkat terdaftar.</Text>
-          )}
+          {devices.length === 0 && <Text style={styles.noDeviceText}>Tidak ada perangkat terdaftar.</Text>}
         </ScrollView>
       </View>
-      
-      {/* FLOATING ACTION BUTTON (+) */}
-      <TouchableOpacity 
-        style={styles.fab} 
-        onPress={handleAddDevice}
-        activeOpacity={0.8}
-      >
+
+      {/* FAB */}
+      <TouchableOpacity style={styles.fab} onPress={handleAddDevice} activeOpacity={0.8}>
         <MaterialCommunityIcons name="plus" size={30} color="#fff" />
       </TouchableOpacity>
-      
+
+      {/* === BOTTOM NAVIGATION (DUA TAB DENGAN ANIMASI) === */}
+      <View style={[styles.bottomNav, { paddingBottom: 0 + insets.bottom }]}>
+        {/* TAB PERANGKAT */}
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => handleTabPress('perangkat')}
+          activeOpacity={0.8}
+        >
+          <Animated.View style={{ transform: [{ scale: scalePerangkat }] }}>
+            <Image
+              source={
+                activeTab === 'perangkat'
+                  ? require('../../../assets/icons/kolam_aktif.png')
+                  : require('../../../assets/icons/kolam_inactive.png')
+              }
+              style={styles.navIcon}
+            />
+          </Animated.View>
+          <Text
+            style={activeTab === 'perangkat' ? styles.navLabelActive : styles.navLabelInactive}
+          >
+            Perangkat
+          </Text>
+        </TouchableOpacity>
+
+        {/* TAB PANGAN */}
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => handleTabPress('pangan')}
+          activeOpacity={0.8}
+        >
+          <Animated.View style={{ transform: [{ scale: scalePangan }] }}>
+            <Image
+              source={
+                activeTab === 'pangan'
+                  ? require('../../../assets/icons/pangan_aktif.png')
+                  : require('../../../assets/icons/pangan_inactive.png')
+              }
+              style={styles.navIcon}
+            />
+          </Animated.View>
+          <Text
+            style={activeTab === 'pangan' ? styles.navLabelActive : styles.navLabelInactive}
+          >
+            Pangan
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
 
+// === STYLING ===
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
-  
-  // === HEADER STYLES ===
   headerContainer: {
-    backgroundColor: '#005930', 
+    backgroundColor: '#005930',
     paddingTop: 10,
     paddingBottom: 40,
     alignItems: 'center',
@@ -123,24 +186,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     opacity: 0.8,
-    // Di layar Daftar Perangkat, subtitle ini bisa dihilangkan jika tidak dibutuhkan
-    display: 'none', 
+    display: 'none',
   },
-  
-  // === BODY & CARD STYLES ===
   bodyContainer: {
     flex: 1,
     width: '100%',
-    marginTop: -30, 
+    marginTop: -30,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
     overflow: 'hidden',
   },
   scrollContent: {
     paddingHorizontal: width * 0.05,
     paddingTop: 20,
-    paddingBottom: 100, 
+    paddingBottom: 120,
   },
   card: {
     flexDirection: 'row',
@@ -155,9 +215,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 3, 
-    borderLeftWidth: 5, 
-    borderLeftColor: '#DDB443', // Warna Kuning
+    elevation: 3,
+    borderLeftWidth: 5,
+    borderLeftColor: '#DDB443',
   },
   cardTitle: {
     fontSize: 18,
@@ -170,18 +230,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   activeText: {
-    color: '#10c916', // Status Aktif (Hijau)
+    color: '#10c916',
   },
   inactiveText: {
-    color: '#FF6347', // Status Tidak Aktif (Merah/Oranye)
+    color: '#FF6347',
   },
   noDeviceText: {
     textAlign: 'center',
     marginTop: 50,
     color: '#999',
   },
-  
-  // === FLOATING ACTION BUTTON STYLES ===
   fab: {
     position: 'absolute',
     width: 56,
@@ -189,11 +247,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     right: 20,
-    bottom: 80, 
-    backgroundColor: '#DDB443', 
-    borderRadius: 28,
+    bottom: 90,
+    backgroundColor: '#DDB443',
+    borderRadius: 7,
     elevation: 8,
   },
+
+  // === BOTTOM NAVIGATION ===
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    flexDirection: 'row',
+    backgroundColor: '#005930',
+    width: '100%',
+    height: 80,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    borderTopWidth: 0.5,
+    borderTopColor: '#004520',
+  },
+  navItem: { alignItems: 'center', justifyContent: 'center', flex: 1 },
+  navIcon: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
+  },
+  navLabelActive: { color: '#fff', fontSize: 13, marginTop: 3, fontWeight: '600' },
+  navLabelInactive: { color: '#ccc', fontSize: 12, marginTop: 3 },
 });
 
 export default DeviceListScreen;
