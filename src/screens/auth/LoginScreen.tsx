@@ -6,20 +6,41 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomInput from '../../components/custominput';
 import CustomButton from '../../components/custombutton';
 
-// IMPOR NAVIGASI (Perlu dua baris ini untuk TypeScript)
+// IMPOR NAVIGASI 
 import { StackNavigationProp } from '@react-navigation/stack';
+// Pastikan Anda mengimpor RootStackParamList jika 'main' adalah bagian dari root navigator Anda.
+// ASUMSI: Aplikasi utama Anda menggunakan nama rute 'main' pada navigator utamanya.
 import { AuthStackParamList } from '../../navigation/authnavigator'; 
 
+// --- START PERBAIKAN TIPE NAVIGASI ---
+// Anda perlu menambahkan tipe untuk 'main' yang diasumsikan sebagai rute di Root Navigator Anda.
+// Biasanya, ketika navigasi keluar dari Auth Stack, Anda akan menggunakan 'Root Stack'
+// atau tipe gabungan yang mencakup rute 'main' (navigator utama aplikasi).
+
+// Perluas AuthStackParamList dengan rute 'main' yang akan menggantikan seluruh stack
+// Jika Anda memiliki 'RootStackParamList', lebih baik impor dan gunakan itu.
+// Untuk tujuan perbaikan cepat ini, kita tambahkan 'main' sebagai rute yang tidak terdefinisi (undefined)
+// yang akan diakses melalui `navigation.replace`.
+// JIKA Anda menggunakan Navigation Container dengan Root Stack, pastikan Anda 
+// mendefinisikannya dengan benar di file tipe navigasi Anda.
+
+// Di sini, kita akan membuat tipe sementara yang memungkinkan navigasi ke 'main'.
+// CATATAN: Dalam aplikasi nyata, 'main' harus didefinisikan dalam RootStackParamList Anda.
+type ExtendedAuthStackParamList = AuthStackParamList & {
+    main: undefined; // Asumsi 'main' adalah nama rute untuk Main/Home Navigator Anda
+};
+
 // Definisikan Tipe Props Navigasi
-type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
+type LoginScreenNavigationProp = StackNavigationProp<ExtendedAuthStackParamList, 'Login'>;
 
 interface LoginScreenProps {
   navigation: LoginScreenNavigationProp;
 }
+// --- END PERBAIKAN TIPE NAVIGASI ---
 
 const { width } = Dimensions.get('window');
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => { // Menerima props 'navigation'
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setMail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -27,7 +48,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => { // Menerim
   const handleLogin = () => {
     // Di sini seharusnya ada logika otentikasi
     console.log('Login successful. Navigating to Main App...');
-    // Jika sukses, Anda akan menavigasi ke navigator utama aplikasi (bukan bagian dari AuthStack)
+    
+    // PERBAIKAN UTAMA:
+    // Gunakan `navigation.replace('main')` untuk mengganti seluruh Auth Stack
+    // dengan Main Stack. Ini akan menghapus riwayat login sehingga pengguna 
+    // tidak dapat kembali ke layar login dengan tombol kembali.
+    navigation.replace('main'); // 'main' adalah nama rute navigator utama Anda
+
+    // CATATAN: Jika Anda menggunakan `navigation.navigate('main')`, 
+    // pastikan 'main' sudah didefinisikan sebagai bagian dari Root Stack 
+    // yang dapat dijangkau oleh Auth Stack. `replace` lebih disukai di sini.
   };
 
   return (
@@ -71,7 +101,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => { // Menerim
           
           <CustomButton 
             title="Masuk" 
-            onPress={handleLogin} 
+            onPress={handleLogin} // Memanggil fungsi handleLogin yang telah diperbaiki
             style={{ marginTop: 30 }} 
           />
           

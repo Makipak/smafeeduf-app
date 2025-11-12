@@ -1,20 +1,59 @@
-// file: App.tsx
-import React from 'react';
+import 'react-native-gesture-handler';
+import React, { useState, useEffect } from 'react';
+import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { createStackNavigator } from '@react-navigation/stack';
 
-// Impor Navigator yang sudah Anda buat
-import AuthNavigator from './src/navigation/authnavigator';
+// Import Navigators
+import AuthNavigator from './src/navigation/authnavigator'; // Harus dibuat (lihat bagian 2)
+import MainNavigator from './src/navigation/mainnavigator'; // Sudah kita perbaiki sebelumnya
 
-export default function App() {
+// --- TIPE ROOT STACK ---
+export type RootStackParamList = {
+  Auth: undefined;
+  Main: undefined; // 💡 Rute ini yang dipanggil oleh LoginScreen.tsx
+};
+
+const RootStack = createStackNavigator<RootStackParamList>();
+
+const App: React.FC = () => {
+  // Simulasikan status otentikasi. 
+  // Dalam aplikasi nyata, ini didapat dari Firebase/Redux/Context.
+  const [userIsAuthenticated, setUserIsAuthenticated] = useState(false); 
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulasikan pengecekan token/otentikasi saat aplikasi dimuat
+  useEffect(() => {
+    // Di sini akan ada logika async untuk memuat user/token
+    setTimeout(() => {
+      // Contoh: Anggap pengguna terotentikasi setelah 2 detik
+      setUserIsAuthenticated(true); 
+      setIsLoading(false);
+    }, 2000);
+  }, []);
+
+  if (isLoading) {
+    // Tampilkan layar loading atau splash screen
+    return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text>Memuat Aplikasi...</Text>
+        </View>
+    );
+  }
+
   return (
-    // 1. SafeAreaProvider: Menangani area aman (notch, bar notifikasi) pada perangkat.
-    <SafeAreaProvider>
-      {/* 2. NavigationContainer: Wajib ada di root untuk mengelola status navigasi. */}
-      <NavigationContainer>
-        {/* 3. AuthNavigator: Stack yang berisi Login, Register, dan Forgot Password. */}
-        <AuthNavigator />
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        {/* Logika Switching: Jika terotentikasi, tampilkan Main. Jika tidak, tampilkan Auth. */}
+        {userIsAuthenticated ? (
+          <RootStack.Screen name="Main" component={MainNavigator} />
+        ) : (
+          <RootStack.Screen name="Auth" component={AuthNavigator} />
+        )}
+      </RootStack.Navigator>
+    </NavigationContainer>
   );
-}
+};
+
+// Pastikan Anda mengekspor komponen utama untuk di-render
+export default App;
