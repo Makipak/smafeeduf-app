@@ -16,7 +16,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const { width } = Dimensions.get('window');
 
-type DeviceListScreenProps = StackScreenProps<MainStackParamList, 'DeviceList'>;
+// ✅ tipe screen disesuaikan dengan navigator kamu
+type DaftarPerangkatProps = StackScreenProps<MainStackParamList, 'DeviceList'>;
 
 interface Device {
   id: number;
@@ -24,17 +25,18 @@ interface Device {
   isActive: boolean;
 }
 
+// ✅ data dummy sementara
 const DUMMY_DEVICES: Device[] = [
   { id: 1, name: 'Feeder 1', isActive: false },
 ];
 
-const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }) => {
-  const { pondId, pondName } = route.params;
+const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({ route, navigation }) => {
+  const { pondName } = route.params || {};
   const [devices, setDevices] = useState<Device[]>(DUMMY_DEVICES);
   const [activeTab, setActiveTab] = useState<'perangkat' | 'pangan'>('perangkat');
   const insets = useSafeAreaInsets();
 
-  // Animasi skala ikon untuk dua tab
+  // animasi tab
   const scalePerangkat = useRef(new Animated.Value(1.2)).current;
   const scalePangan = useRef(new Animated.Value(1)).current;
 
@@ -53,11 +55,11 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
   };
 
   useEffect(() => {
-    console.log(`Menampilkan perangkat untuk Kolam: ${pondName} (ID: ${pondId})`);
-  }, [pondId, pondName]);
+    console.log(`Menampilkan perangkat untuk Kolam: ${pondName}`);
+  }, [pondName]);
 
   const handleAddDevice = () => {
-    console.log("Menavigasi ke Tambah Perangkat untuk Kolam:", pondName);
+    navigation.navigate('CariPerangkat');
   };
 
   const handleTabPress = (tab: 'perangkat' | 'pangan') => {
@@ -65,7 +67,8 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
     animateTab(tab);
 
     if (tab === 'pangan') {
-      navigation.navigate('MainTabs', { screen: 'Food' });
+      // ✅ pindah ke tab Pangan di main
+      navigation.navigate('Pangan');
     }
   };
 
@@ -73,12 +76,21 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
     <TouchableOpacity
       key={device.id}
       style={styles.card}
-      onPress={() => console.log('Buka detail perangkat', device.name)}
+      onPress={() =>
+        navigation.navigate('DetailPerangkat', {
+          deviceName: device.name,
+        })
+      }
       activeOpacity={0.7}
     >
       <View>
         <Text style={styles.cardTitle}>{device.name}</Text>
-        <Text style={[styles.cardSubtitle, device.isActive ? styles.activeText : styles.inactiveText]}>
+        <Text
+          style={[
+            styles.cardSubtitle,
+            device.isActive ? styles.activeText : styles.inactiveText,
+          ]}
+        >
           {device.isActive ? 'Aktif' : 'Tidak Aktif'}
         </Text>
       </View>
@@ -98,23 +110,29 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
       {/* HEADER */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Daftar Perangkat</Text>
-        <Text style={styles.headerSubtitle}>{pondName || 'Kolam Detail'}</Text>
+        <Text style={styles.headerSubtitle}>{pondName || 'Kolam Tanpa Nama'}</Text>
       </View>
 
       {/* BODY */}
       <View style={styles.bodyContainer}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {devices.map(renderDeviceCard)}
-          {devices.length === 0 && <Text style={styles.noDeviceText}>Tidak ada perangkat terdaftar.</Text>}
+          {devices.length === 0 && (
+            <Text style={styles.noDeviceText}>Tidak ada perangkat terdaftar.</Text>
+          )}
         </ScrollView>
       </View>
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={handleAddDevice} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={[styles.fab, { bottom: 75 + insets.bottom }]}
+        onPress={handleAddDevice}
+        activeOpacity={0.8}
+      >
         <MaterialCommunityIcons name="plus" size={30} color="#fff" />
       </TouchableOpacity>
 
-      {/* === BOTTOM NAVIGATION (DUA TAB DENGAN ANIMASI) === */}
+      {/* BOTTOM NAVIGATION */}
       <View style={[styles.bottomNav, { paddingBottom: 0 + insets.bottom }]}>
         {/* TAB PERANGKAT */}
         <TouchableOpacity
@@ -126,14 +144,18 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
             <Image
               source={
                 activeTab === 'perangkat'
-                  ? require('../../../assets/icons/kolam_aktif.png')
-                  : require('../../../assets/icons/kolam_inactive.png')
+                  ? require('../../../assets/icons/perangkat_aktif.png')
+                  : require('../../../assets/icons/perangkat_inactive.png')
               }
               style={styles.navIcon}
             />
           </Animated.View>
           <Text
-            style={activeTab === 'perangkat' ? styles.navLabelActive : styles.navLabelInactive}
+            style={
+              activeTab === 'perangkat'
+                ? styles.navLabelActive
+                : styles.navLabelInactive
+            }
           >
             Perangkat
           </Text>
@@ -156,7 +178,11 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
             />
           </Animated.View>
           <Text
-            style={activeTab === 'pangan' ? styles.navLabelActive : styles.navLabelInactive}
+            style={
+              activeTab === 'pangan'
+                ? styles.navLabelActive
+                : styles.navLabelInactive
+            }
           >
             Pangan
           </Text>
@@ -166,11 +192,11 @@ const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ route, navigation }
   );
 };
 
-// === STYLING ===
+// === STYLES ===
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
   headerContainer: {
-    backgroundColor: '#005930',
+    backgroundColor: '#2C5C52',
     paddingTop: 10,
     paddingBottom: 40,
     alignItems: 'center',
@@ -186,7 +212,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     opacity: 0.8,
-    display: 'none',
   },
   bodyContainer: {
     flex: 1,
@@ -247,20 +272,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     right: 20,
-    top: 669,
     backgroundColor: '#DDB443',
     borderRadius: 16,
     elevation: 8,
   },
-
-  // === BOTTOM NAVIGATION ===
   bottomNav: {
     position: 'absolute',
     bottom: 0,
     flexDirection: 'row',
-    backgroundColor: '#005930',
+    backgroundColor: '#2C5C52',
     width: '100%',
-    height: 110,
+    height: 85,
     justifyContent: 'space-evenly',
     alignItems: 'center',
     borderTopWidth: 0.5,
@@ -276,4 +298,4 @@ const styles = StyleSheet.create({
   navLabelInactive: { color: '#ccc', fontSize: 12, marginTop: 3 },
 });
 
-export default DeviceListScreen;
+export default DaftarPerangkat;
