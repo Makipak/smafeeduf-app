@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
+    textAlign: 'center',
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 15,
