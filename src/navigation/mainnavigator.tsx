@@ -12,6 +12,7 @@ import CariPerangkat from "../screens/DaftarPerangkat/cariperangkat";
 import DaftarPerangkat from "../screens/DaftarPerangkat/daftarperangkat";
 import DetailPerangkat from "../screens/DetailPerangkat/detailperangkat";
 import MonitoringDetailPerangkat from "../screens/DetailPerangkat/monitoringDetailperangkat";
+import SettingScreen from "../screens/main/settings";
 
 // ✅ 1. Tab navigator hanya buat 3 tab
 export type MainTabParamList = {
@@ -67,7 +68,7 @@ const MainTabNavigator = () => (
     />
     <Tab.Screen
       name="Setting"
-      component={Setting}
+      component={SettingScreen}
       options={{
         tabBarLabel: "Setting",
         tabBarIcon: ({ focused }) => (
