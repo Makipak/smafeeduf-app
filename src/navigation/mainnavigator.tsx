@@ -13,6 +13,7 @@ import DaftarPerangkat from "../screens/DaftarPerangkat/daftarperangkat";
 import DetailPerangkat from "../screens/DetailPerangkat/detailperangkat";
 import MonitoringDetailPerangkat from "../screens/DetailPerangkat/monitoringDetailperangkat";
 import SettingScreen from "../screens/main/settings";
+import MonitoringKolam from "../screens/DaftarPerangkat/monitoringkolam";
 
 // ✅ 1. Tab navigator hanya buat 3 tab
 export type MainTabParamList = {
@@ -88,13 +89,14 @@ const MainTabNavigator = () => (
 
 // ✅ 2. Stack navigator untuk navigasi antar-screen
 export type MainStackParamList = {
-  MainTab: undefined;
+  MainTab: { screen: keyof MainStackParamList } | undefined;
   DeviceList: { pondId: number; pondName: string };
   CariPerangkat: undefined;
   DetailPerangkat: { deviceName: string };
-  MonitoringDetailPerangkat: { stokPakan: number };
+  MonitoringPangan: { stokPakan: number };
   Pangan: undefined;
   MonitoringGlobal: { summary: string };
+  MonitoringKolam: { pondId: number; pondName: string };
 };
 
 const Stack = createStackNavigator<MainStackParamList>();
@@ -106,8 +108,12 @@ const MainNavigator = () => (
     <Stack.Screen name="CariPerangkat" component={CariPerangkat} />
     <Stack.Screen name="DetailPerangkat" component={DetailPerangkat} />
     <Stack.Screen
-      name="MonitoringDetailPerangkat"
+      name="MonitoringPangan"
       component={MonitoringDetailPerangkat}
+    />
+    <Stack.Screen
+    name="MonitoringKolam"
+    component={MonitoringKolam}
     />
   </Stack.Navigator>
 );

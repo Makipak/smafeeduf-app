@@ -13,12 +13,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackScreenProps } from "@react-navigation/stack";
+import { MainStackParamList } from "../../navigation/mainnavigator";
 
 // === Tipe Navigasi ===
-type MainStackParamList = {
-  DetailPerangkat: { deviceName: string };
-  MonitoringPakan: { stokPakan: number };
-};
 
 type DetailPerangkatScreenProps = StackScreenProps<
   MainStackParamList,
@@ -187,7 +184,7 @@ const DetailPerangkatScreen: React.FC<DetailPerangkatScreenProps> = ({
             style={styles.settingRow}
             onPress={() =>
               stokPakan !== null &&
-              navigation.navigate("MonitoringPakan", { stokPakan })
+              navigation.navigate("MonitoringPangan", { stokPakan })
             }
           >
             <Text style={styles.settingLabel}>Sisa Pakan</Text>

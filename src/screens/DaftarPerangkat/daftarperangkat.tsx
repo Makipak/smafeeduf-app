@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,9 +14,10 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { MainStackParamList } from '../../navigation/mainnavigator';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import MonitoringKolam from "./monitoringkolam";
+
 const { width } = Dimensions.get('window');
 
-// ✅ tipe screen disesuaikan dengan navigator kamu
 type DaftarPerangkatProps = StackScreenProps<MainStackParamList, 'DeviceList'>;
 
 interface Device {
@@ -25,18 +26,19 @@ interface Device {
   isActive: boolean;
 }
 
-// ✅ data dummy sementara
 const DUMMY_DEVICES: Device[] = [
-  { id: 1, name: 'Feeder 1', isActive: false },
+  { id: 1, name: 'Feeder 1', isActive: true },
 ];
 
-const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({ route, navigation }) => {
-  const { pondName } = route.params || {};
-  const [devices, setDevices] = useState<Device[]>(DUMMY_DEVICES);
+const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
+  route,
+  navigation,
+}) => {
+  const { pondName, pondId } = route.params || {};
+  const [devices] = useState<Device[]>(DUMMY_DEVICES);
   const [activeTab, setActiveTab] = useState<'perangkat' | 'pangan'>('perangkat');
   const insets = useSafeAreaInsets();
 
-  // animasi tab
   const scalePerangkat = useRef(new Animated.Value(1.2)).current;
   const scalePangan = useRef(new Animated.Value(1)).current;
 
@@ -54,33 +56,13 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({ route, navigation }) 
     }
   };
 
-  useEffect(() => {
-    console.log(`Menampilkan perangkat untuk Kolam: ${pondName}`);
-  }, [pondName]);
-
-  const handleAddDevice = () => {
-    navigation.navigate('CariPerangkat');
-  };
-
-  const handleTabPress = (tab: 'perangkat' | 'pangan') => {
-    setActiveTab(tab);
-    animateTab(tab);
-
-    if (tab === 'pangan') {
-      // ✅ pindah ke tab Pangan di main
-      navigation.navigate('Pangan');
-    }
-  };
+  const handleAddDevice = () => navigation.navigate('CariPerangkat');
 
   const renderDeviceCard = (device: Device) => (
     <TouchableOpacity
       key={device.id}
       style={styles.card}
-      onPress={() =>
-        navigation.navigate('DetailPerangkat', {
-          deviceName: device.name,
-        })
-      }
+      onPress={() => navigation.navigate('DetailPerangkat', { deviceName: device.name })}
       activeOpacity={0.7}
     >
       <View>
@@ -94,51 +76,72 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({ route, navigation }) 
           {device.isActive ? 'Aktif' : 'Tidak Aktif'}
         </Text>
       </View>
-      <TouchableOpacity
-        onPress={(e) => {
-          e.stopPropagation();
-          console.log('Opsi Perangkat', device.name);
-        }}
-      >
-        <MaterialCommunityIcons name="dots-vertical" size={24} color="#000" />
-      </TouchableOpacity>
+
+      <MaterialCommunityIcons name="dots-vertical" size={24} color="#000" />
     </TouchableOpacity>
   );
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* HEADER */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Daftar Perangkat</Text>
-        <Text style={styles.headerSubtitle}>{pondName || 'Kolam Tanpa Nama'}</Text>
-      </View>
-
-      {/* BODY */}
-      <View style={styles.bodyContainer}>
+  const renderContent = () => {
+    if (activeTab === 'perangkat') {
+      return (
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {devices.map(renderDeviceCard)}
           {devices.length === 0 && (
             <Text style={styles.noDeviceText}>Tidak ada perangkat terdaftar.</Text>
           )}
         </ScrollView>
+      );
+    }
+
+    return (
+      <MonitoringKolam
+        pondId={pondId}
+        pondName={pondName}
+        navigation={navigation}
+      />
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      {/* Header berubah sesuai tab */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>
+          {activeTab === "perangkat" ? "Daftar Perangkat" : "Monitoring Kolam"}
+        </Text>
+        <Text style={styles.headerSubtitle}>{pondName}</Text>
       </View>
 
-      {/* FAB */}
-      <TouchableOpacity
-        style={[styles.fab, { bottom: 75 + insets.bottom }]}
-        onPress={handleAddDevice}
-        activeOpacity={0.8}
+      {/* Body dengan rounded beda */}
+      <View
+        style={[
+          activeTab === "perangkat"
+            ? styles.bodyRounded
+            : styles.bodyFlat
+        ]}
       >
-        <MaterialCommunityIcons name="plus" size={30} color="#fff" />
-      </TouchableOpacity>
+        {renderContent()}
+      </View>
 
-      {/* BOTTOM NAVIGATION */}
-      <View style={[styles.bottomNav, { paddingBottom: 0 + insets.bottom }]}>
-        {/* TAB PERANGKAT */}
+      {/* FAB hanya muncul di perangkat */}
+      {activeTab === "perangkat" && (
+        <TouchableOpacity
+          style={[styles.fab, { bottom: 75 + insets.bottom }]}
+          onPress={handleAddDevice}
+        >
+          <MaterialCommunityIcons name="plus" size={30} color="#fff" />
+        </TouchableOpacity>
+      )}
+
+      {/* BOTTOM TABS */}
+      <View style={[styles.bottomNav, { paddingBottom: insets.bottom }]}>
+        {/* PERANGKAT */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => handleTabPress('perangkat')}
-          activeOpacity={0.8}
+          onPress={() => {
+            setActiveTab('perangkat');
+            animateTab('perangkat');
+          }}
         >
           <Animated.View style={{ transform: [{ scale: scalePerangkat }] }}>
             <Image
@@ -152,20 +155,20 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({ route, navigation }) 
           </Animated.View>
           <Text
             style={
-              activeTab === 'perangkat'
-                ? styles.navLabelActive
-                : styles.navLabelInactive
+              activeTab === 'perangkat' ? styles.navLabelActive : styles.navLabelInactive
             }
           >
             Perangkat
           </Text>
         </TouchableOpacity>
 
-        {/* TAB PANGAN */}
+        {/* PANGAN */}
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => handleTabPress('pangan')}
-          activeOpacity={0.8}
+          onPress={() => {
+            setActiveTab('pangan');
+            animateTab('pangan');
+          }}
         >
           <Animated.View style={{ transform: [{ scale: scalePangan }] }}>
             <Image
@@ -179,9 +182,7 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({ route, navigation }) 
           </Animated.View>
           <Text
             style={
-              activeTab === 'pangan'
-                ? styles.navLabelActive
-                : styles.navLabelInactive
+              activeTab === 'pangan' ? styles.navLabelActive : styles.navLabelInactive
             }
           >
             Pangan
@@ -192,9 +193,12 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({ route, navigation }) 
   );
 };
 
-// === STYLES ===
+/* ==========================================
+   STYLES
+========================================== */
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
+
   headerContainer: {
     backgroundColor: '#2C5C52',
     paddingTop: 10,
@@ -202,31 +206,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
+
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 5,
   },
+
   headerSubtitle: {
     fontSize: 16,
     color: '#fff',
     opacity: 0.8,
   },
-  bodyContainer: {
+
+  /* PERANGKAT rounded full */
+  bodyRounded: {
     flex: 1,
     width: '100%',
-    marginTop: -30,
+    backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    backgroundColor: '#fff',
-    overflow: 'hidden',
+    marginTop: -30,
+    paddingTop: 10,
   },
+
+  /* PANGAN: tetap rounded tapi posisi sedikit beda */
+  bodyFlat: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -20,
+    paddingTop: 10,
+  },
+
   scrollContent: {
     paddingHorizontal: width * 0.05,
     paddingTop: 20,
     paddingBottom: 120,
   },
+
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -235,36 +256,22 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     marginBottom: 15,
-    width: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
     borderLeftWidth: 5,
     borderLeftColor: '#DDB443',
+    elevation: 3,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 2,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  activeText: {
-    color: '#10c916',
-  },
-  inactiveText: {
-    color: '#FF6347',
-  },
+
+  cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#000' },
+  cardSubtitle: { fontSize: 14, fontWeight: '600' },
+  activeText: { color: '#10c916' },
+  inactiveText: { color: '#FF6347' },
+
   noDeviceText: {
     textAlign: 'center',
     marginTop: 50,
     color: '#999',
   },
+
   fab: {
     position: 'absolute',
     width: 56,
@@ -276,6 +283,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     elevation: 8,
   },
+
   bottomNav: {
     position: 'absolute',
     bottom: 0,
@@ -285,16 +293,23 @@ const styles = StyleSheet.create({
     height: 85,
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    borderTopWidth: 0.5,
-    borderTopColor: '#004520',
   },
+
   navItem: { alignItems: 'center', justifyContent: 'center', flex: 1 },
+
   navIcon: {
     width: 24,
     height: 24,
     resizeMode: 'contain',
   },
-  navLabelActive: { color: '#fff', fontSize: 13, marginTop: 3, fontWeight: '600' },
+
+  navLabelActive: {
+    color: '#fff',
+    fontSize: 13,
+    marginTop: 3,
+    fontWeight: '600',
+  },
+
   navLabelInactive: { color: '#ccc', fontSize: 12, marginTop: 3 },
 });
 
