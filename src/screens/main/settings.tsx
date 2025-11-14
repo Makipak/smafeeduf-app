@@ -1,3 +1,4 @@
+import { useAuth } from '../../context/AuthContext';
 import React from 'react';
 import {
   View,
@@ -26,17 +27,16 @@ const DUMMY_USER = {
 };
 
 const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
+    const { logout } = useAuth();
   const insets = useSafeAreaInsets();
   
   // Asumsi: Kita berada di Tab 'Setting', jadi header bawaan tab sudah ada.
   // Namun, karena gambar menunjukkan header custom, kita buat header tersebut.
 
   const handleLogout = () => {
-    // Logika Logout Anda di sini
+    // Logika Logout: set auth ke false
     console.log("Tombol Logout ditekan. Melakukan proses keluar...");
-    
-    // Contoh: Navigasi ke layar Login (perlu MainStackParamList diimpor)
-    // navigation.navigate('AuthNavigator'); // Contoh jika AuthNavigator adalah rute di Root Stack
+    logout();
   };
   
   const handleEditProfile = () => {

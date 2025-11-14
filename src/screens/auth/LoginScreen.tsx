@@ -1,3 +1,4 @@
+import { useAuth } from '../../context/AuthContext';
 // file: screens/auth/LoginScreen.tsx
 
 import React, { useState } from 'react';
@@ -41,23 +42,19 @@ interface LoginScreenProps {
 const { width } = Dimensions.get('window');
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+    const { login } = useAuth();
   const [email, setMail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleLogin = () => {
+    // Dump email and password to console
+    console.log('Email:', email);
+    console.log('Password:', password);
     // Di sini seharusnya ada logika otentikasi
     console.log('Login successful. Navigating to Main App...');
-    
-    // PERBAIKAN UTAMA:
-    // Gunakan `navigation.replace('main')` untuk mengganti seluruh Auth Stack
-    // dengan Main Stack. Ini akan menghapus riwayat login sehingga pengguna 
-    // tidak dapat kembali ke layar login dengan tombol kembali.
-    navigation.replace('main'); // 'main' adalah nama rute navigator utama Anda
-
-    // CATATAN: Jika Anda menggunakan `navigation.navigate('main')`, 
-    // pastikan 'main' sudah didefinisikan sebagai bagian dari Root Stack 
-    // yang dapat dijangkau oleh Auth Stack. `replace` lebih disukai di sini.
+    // Set authenticated state, App will switch to Main
+    login();
   };
 
   return (

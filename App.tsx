@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -16,36 +17,13 @@ export type RootStackParamList = {
 
 const RootStack = createStackNavigator<RootStackParamList>();
 
-const App: React.FC = () => {
-  // Simulasikan status otentikasi. 
-  // Dalam aplikasi nyata, ini didapat dari Firebase/Redux/Context.
-  const [userIsAuthenticated, setUserIsAuthenticated] = useState(false); 
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Simulasikan pengecekan token/otentikasi saat aplikasi dimuat
-  useEffect(() => {
-    // Di sini akan ada logika async untuk memuat user/token
-    setTimeout(() => {
-      // Contoh: Anggap pengguna BELUM terotentikasi setelah 2 detik
-      setUserIsAuthenticated(false); 
-      setIsLoading(false);
-    }, 2000);
-  }, []);
-
-  if (isLoading) {
-    // Tampilkan layar loading atau splash screen
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Memuat Aplikasi...</Text>
-        </View>
-    );
-  }
-
+const AppContent: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   return (
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        {/* Logika Switching: Jika terotentikasi, tampilkan Main. Jika tidak, tampilkan Auth. */}
-        {userIsAuthenticated ? (
+        {isAuthenticated ? (
           <RootStack.Screen name="Main" component={MainNavigator} />
         ) : (
           <RootStack.Screen name="Auth" component={AuthNavigator} />
@@ -54,6 +32,12 @@ const App: React.FC = () => {
     </NavigationContainer>
   );
 };
+
+const App: React.FC = () => (
+  <AuthProvider>
+    <AppContent />
+  </AuthProvider>
+);
 
 // Pastikan Anda mengekspor komponen utama untuk di-render
 export default App;
