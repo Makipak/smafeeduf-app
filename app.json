@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "jsEngine": "jsc",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/SMAFEED-UF.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
