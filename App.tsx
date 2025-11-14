@@ -26,8 +26,8 @@ const App: React.FC = () => {
   useEffect(() => {
     // Di sini akan ada logika async untuk memuat user/token
     setTimeout(() => {
-      // Contoh: Anggap pengguna terotentikasi setelah 2 detik
-      setUserIsAuthenticated(true); 
+      // Contoh: Anggap pengguna BELUM terotentikasi setelah 2 detik
+      setUserIsAuthenticated(false); 
       setIsLoading(false);
     }, 2000);
   }, []);
