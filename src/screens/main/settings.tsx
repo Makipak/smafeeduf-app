@@ -37,7 +37,9 @@ const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
     // Logika Logout: set auth ke false
     console.log("Tombol Logout ditekan. Melakukan proses keluar...");
     logout();
-  };
+  }  
+
+  // ...existing code...
   
   const handleEditProfile = () => {
     console.log("Tombol Edit Profile ditekan.");
@@ -53,6 +55,25 @@ const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
       </View>
       <View style={styles.bodyRounded}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Info Akun */}
+          <View style={styles.sectionBox}>
+            <Text style={styles.sectionTitle}>Akun</Text>
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>Nama:</Text><Text style={styles.infoValue}>{DUMMY_USER.name}</Text></View>
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>Email:</Text><Text style={styles.infoValue}>{DUMMY_USER.email}</Text></View>
+            <TouchableOpacity style={styles.editButton} onPress={handleEditProfile} activeOpacity={0.8}>
+              <Ionicons name="create-outline" size={18} color="#2C5C52" />
+              <Text style={styles.editButtonText}>Edit Profil</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Preferensi */}
+          <View style={styles.sectionBox}>
+            <Text style={styles.sectionTitle}>Preferensi</Text>
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>Notifikasi:</Text><Text style={styles.infoValue}>Aktif</Text></View>
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>Bahasa:</Text><Text style={styles.infoValue}>Indonesia</Text></View>
+          </View>
+
+          {/* Tombol Logout */}
           <TouchableOpacity
             style={styles.logoutButton}
             onPress={handleLogout}
@@ -100,6 +121,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.05,
     paddingTop: 20,
     paddingBottom: 40,
+  },
+  sectionBox: {
+    backgroundColor: '#F7F7F7',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2C5C52',
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  infoLabel: {
+    fontWeight: '600',
+    color: '#555',
+  },
+  infoValue: {
+    color: '#222',
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: '#EDEDED',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  editButtonText: {
+    marginLeft: 6,
+    color: '#2C5C52',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
   logoutButton: {
     backgroundColor: '#DDB443',
