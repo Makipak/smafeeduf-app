@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   Animated,
+  Modal,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -35,8 +36,10 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
   navigation,
 }) => {
   const { pondName, pondId } = route.params || {};
-  const [devices] = useState<Device[]>(DUMMY_DEVICES);
+  const [devices, setDevices] = useState<Device[]>(DUMMY_DEVICES);
   const [activeTab, setActiveTab] = useState<'perangkat' | 'pangan'>('perangkat');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   const scalePerangkat = useRef(new Animated.Value(1.2)).current;
@@ -58,6 +61,12 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
 
   const handleAddDevice = () => navigation.navigate('CariPerangkat');
 
+  const handleDeleteDevice = (id: number) => {
+    setDevices((prev) => prev.filter((device) => device.id !== id));
+    setConfirmDeleteVisible(false);
+    setDeleteId(null);
+  };
+
   const renderDeviceCard = (device: Device) => (
     <TouchableOpacity
       key={device.id}
@@ -76,8 +85,15 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
           {device.isActive ? 'Aktif' : 'Tidak Aktif'}
         </Text>
       </View>
-
-      <MaterialCommunityIcons name="dots-vertical" size={24} color="#000" />
+      <TouchableOpacity
+        onPress={(e) => {
+          e.stopPropagation();
+          setDeleteId(device.id);
+          setConfirmDeleteVisible(true);
+        }}
+      >
+        <MaterialCommunityIcons name="dots-vertical" size={24} color="#000" />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 
@@ -111,17 +127,32 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
         </Text>
         <Text style={styles.headerSubtitle}>{pondName}</Text>
       </View>
-
-      {/* Body dengan rounded beda */}
-      <View
-        style={[
-          activeTab === "perangkat"
-            ? styles.bodyRounded
-            : styles.bodyFlat
-        ]}
-      >
+      <View style={styles.bodyRounded}>
         {renderContent()}
       </View>
+      {/* MODAL KONFIRMASI HAPUS */}
+      {confirmDeleteVisible && (
+        <Modal
+          transparent
+          visible={confirmDeleteVisible}
+          animationType="fade"
+        >
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+            <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '80%' }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Hapus Perangkat?</Text>
+              <Text style={{ marginBottom: 24 }}>Apakah Anda yakin ingin menghapus perangkat ini?</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                <TouchableOpacity onPress={() => setConfirmDeleteVisible(false)} style={{ marginRight: 16 }}>
+                  <Text style={{ color: '#2C5C52', fontWeight: 'bold' }}>Batal</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDeleteDevice(deleteId!)}>
+                  <Text style={{ color: '#FF6347', fontWeight: 'bold' }}>Hapus</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {/* FAB hanya muncul di perangkat */}
       {activeTab === "perangkat" && (
@@ -198,7 +229,6 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
 ========================================== */
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
-
   headerContainer: {
     backgroundColor: '#2C5C52',
     paddingTop: 10,
@@ -206,21 +236,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 5,
   },
-
   headerSubtitle: {
     fontSize: 16,
     color: '#fff',
     opacity: 0.8,
   },
-
-  /* PERANGKAT rounded full */
   bodyRounded: {
     flex: 1,
     width: '100%',
@@ -230,24 +256,11 @@ const styles = StyleSheet.create({
     marginTop: -30,
     paddingTop: 10,
   },
-
-  /* PANGAN: tetap rounded tapi posisi sedikit beda */
-  bodyFlat: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -20,
-    paddingTop: 10,
-  },
-
   scrollContent: {
     paddingHorizontal: width * 0.05,
     paddingTop: 20,
     paddingBottom: 120,
   },
-
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -260,18 +273,15 @@ const styles = StyleSheet.create({
     borderLeftColor: '#DDB443',
     elevation: 3,
   },
-
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#000' },
   cardSubtitle: { fontSize: 14, fontWeight: '600' },
   activeText: { color: '#10c916' },
   inactiveText: { color: '#FF6347' },
-
   noDeviceText: {
     textAlign: 'center',
     marginTop: 50,
     color: '#999',
   },
-
   fab: {
     position: 'absolute',
     width: 56,
@@ -283,7 +293,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     elevation: 8,
   },
-
   bottomNav: {
     position: 'absolute',
     bottom: 0,
@@ -294,22 +303,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'center',
   },
-
   navItem: { alignItems: 'center', justifyContent: 'center', flex: 1 },
-
   navIcon: {
     width: 24,
     height: 24,
     resizeMode: 'contain',
   },
-
   navLabelActive: {
     color: '#fff',
     fontSize: 13,
     marginTop: 3,
     fontWeight: '600',
   },
-
   navLabelInactive: { color: '#ccc', fontSize: 12, marginTop: 3 },
 });
 

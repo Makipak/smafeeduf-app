@@ -38,6 +38,8 @@ const PondList: React.FC<PondListScreenProps> = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [pondName, setPondName] = useState('');
   const [activeTab, setActiveTab] = useState<'kolam' | 'pangan'>('kolam');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   // animasi icon tab
@@ -79,6 +81,12 @@ const PondList: React.FC<PondListScreenProps> = ({ navigation }) => {
     setModalVisible(false);
   };
 
+  const handleDeletePond = (id: number) => {
+    setPonds((prev) => prev.filter((pond) => pond.id !== id));
+    setConfirmDeleteVisible(false);
+    setDeleteId(null);
+  };
+
   const renderPondCard = (pond: Pond) => (
     <TouchableOpacity
       key={pond.id}
@@ -95,7 +103,8 @@ const PondList: React.FC<PondListScreenProps> = ({ navigation }) => {
       <TouchableOpacity
         onPress={(e) => {
           e.stopPropagation();
-          console.log('Opsi Kolam:', pond.name);
+          setDeleteId(pond.id);
+          setConfirmDeleteVisible(true);
         }}
       >
         <MaterialCommunityIcons name="dots-vertical" size={24} color="#000" />
@@ -110,7 +119,6 @@ const PondList: React.FC<PondListScreenProps> = ({ navigation }) => {
         <Text style={styles.headerTitle}>Daftar Kolam</Text>
         <Text style={styles.headerSubtitle}>Selamat Datang, JaneDoe</Text>
       </View>
-
       {/* BODY */}
       <View style={styles.bodyContainer}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -121,7 +129,29 @@ const PondList: React.FC<PondListScreenProps> = ({ navigation }) => {
           )}
         </ScrollView>
       </View>
-
+      {/* MODAL KONFIRMASI HAPUS */}
+      {confirmDeleteVisible && (
+        <Modal
+          transparent
+          visible={confirmDeleteVisible}
+          animationType="fade"
+        >
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+            <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '80%' }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Hapus Kolam?</Text>
+              <Text style={{ marginBottom: 24 }}>Apakah Anda yakin ingin menghapus kolam ini?</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                <TouchableOpacity onPress={() => setConfirmDeleteVisible(false)} style={{ marginRight: 16 }}>
+                  <Text style={{ color: '#2C5C52', fontWeight: 'bold' }}>Batal</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDeletePond(deleteId!)}>
+                  <Text style={{ color: '#FF6347', fontWeight: 'bold' }}>Hapus</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
       {/* FLOATING BUTTON */}
       <TouchableOpacity
         style={[styles.fab, { bottom: insets.bottom }]}

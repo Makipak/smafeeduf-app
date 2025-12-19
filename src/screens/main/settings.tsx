@@ -46,39 +46,22 @@ const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* HEADER HIJAU GELAP (Sesuai Gambar) */}
-      <View style={[styles.headerContainer, { paddingTop: 1 + insets.top }]}>
-        {/* Ikon Edit di Kanan Atas */}
-        <TouchableOpacity 
-          style={styles.editButton} 
-          onPress={handleEditProfile}
-        >
-          <Ionicons name="create-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-
-        {/* Ikon Avatar */}
-        <View style={styles.avatarContainer}>
-          <Ionicons name="person-circle-outline" size={80} color="#fff" />
-        </View>
-
-        {/* Nama Pengguna */}
-        <Text style={styles.userName}>{DUMMY_USER.name}</Text>
+      {/* HEADER */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>Pengaturan</Text>
+        <Text style={styles.headerSubtitle}>Kelola Akun & Preferensi</Text>
       </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* TOMBOL LOGOUT (Warna Emas/Kuning) */}
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-
-      </ScrollView>
-      
-      {/* Catatan: Bottom Tab Navigator dihandle oleh MainTabs Component */}
+      <View style={styles.bodyRounded}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -86,61 +69,50 @@ const SettingScreen: React.FC<SettingScreenProps> = ({ navigation }) => {
 // === STYLING ===
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
-  
   headerContainer: {
-    backgroundColor: '#2C5C52', // Hijau gelap
-    width: '100%',
-    paddingBottom: 10,
+    backgroundColor: '#2C5C52',
+    paddingTop: 10,
+    paddingBottom: 40,
     alignItems: 'center',
-    overflow: 'hidden',
-    position: 'relative',
+    width: '100%',
   },
-  editButton: {
-    position: 'absolute',
-    top: 20, // Akan disesuaikan oleh insets.top
-    right: 20,
-    zIndex: 1,
-    padding: 5,
-  },
-  avatarContainer: {
-    marginTop: 1,
-    // Kita gunakan ikon person-circle-outline sebagai avatar
-  },
-  userName: {
-    fontSize: 20,
+  headerTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 10,
+    marginBottom: 5,
   },
-  
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#fff',
+    opacity: 0.8,
+  },
+  bodyRounded: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -30,
+    paddingTop: 10,
+  },
   scrollContent: {
     paddingHorizontal: width * 0.05,
-    paddingTop: 30,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
-
   logoutButton: {
-    backgroundColor: '#DDB443', // Warna Emas/Kuning
-    paddingVertical: 15,
-    borderRadius: 10,
+    backgroundColor: '#DDB443',
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    shadowColor: '#DDB443',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    marginTop: 30,
   },
   logoutText: {
     color: '#fff',
-    fontSize: 18,
     fontWeight: 'bold',
+    fontSize: 16,
   },
-  
-  placeholderText: {
-      color: '#999',
-      fontSize: 14,
-  }
 });
 
 export default SettingScreen;
