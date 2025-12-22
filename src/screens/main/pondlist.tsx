@@ -31,10 +31,24 @@ interface Pond {
   deviceCount: number;
 }
 
-const DUMMY_PONDS: Pond[] = [{ id: 1, name: 'Kolam A', deviceCount: 1 }];
-
 const PondList: React.FC<PondListScreenProps> = ({ navigation }) => {
-  const [ponds, setPonds] = useState<Pond[]>(DUMMY_PONDS);
+  const [ponds, setPonds] = useState<Pond[]>([]);
+    // Ganti userId sesuai user login, sementara pakai 1 (dummy)
+    const userId = 1;
+    React.useEffect(() => {
+      const loadPonds = async () => {
+        try {
+          const { initDatabase } = await import('../../database/schema');
+          const { getPondsByUser } = await import('../../database/pondService');
+          initDatabase();
+          const dbPonds = await getPondsByUser(userId);
+          setPonds(dbPonds);
+        } catch (e) {
+          // Handle error
+        }
+      };
+      loadPonds();
+    }, []);
   const [modalVisible, setModalVisible] = useState(false);
   const [pondName, setPondName] = useState('');
   const [activeTab, setActiveTab] = useState<'kolam' | 'pangan'>('kolam');
@@ -69,20 +83,29 @@ const PondList: React.FC<PondListScreenProps> = ({ navigation }) => {
 
   const handleAddPond = () => setModalVisible(true);
 
-  const handleSavePond = () => {
+  const handleSavePond = async () => {
     if (!pondName.trim()) return;
-    const newPond: Pond = {
-      id: ponds.length + 1,
-      name: pondName.trim(),
-      deviceCount: 0,
-    };
-    setPonds((prev) => [...prev, newPond]);
+    try {
+      const { addPond, getPondsByUser } = await import('../../database/pondService');
+      await addPond(userId, pondName.trim());
+      const dbPonds = await getPondsByUser(userId);
+      setPonds(dbPonds);
+    } catch (e) {
+      // Handle error
+    }
     setPondName('');
     setModalVisible(false);
   };
 
-  const handleDeletePond = (id: number) => {
-    setPonds((prev) => prev.filter((pond) => pond.id !== id));
+  const handleDeletePond = async (id: number) => {
+    try {
+      const { deletePond, getPondsByUser } = await import('../../database/pondService');
+      await deletePond(id);
+      const dbPonds = await getPondsByUser(userId);
+      setPonds(dbPonds);
+    } catch (e) {
+      // Handle error
+    }
     setConfirmDeleteVisible(false);
     setDeleteId(null);
   };

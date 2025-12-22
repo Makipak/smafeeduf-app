@@ -27,16 +27,35 @@ interface Device {
   isActive: boolean;
 }
 
-const DUMMY_DEVICES: Device[] = [
-  { id: 1, name: 'Feeder 1', isActive: true },
-];
+
 
 const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
   route,
   navigation,
 }) => {
   const { pondName, pondId } = route.params || {};
-  const [devices, setDevices] = useState<Device[]>(DUMMY_DEVICES);
+  const [devices, setDevices] = useState<Device[]>([]);
+    // Database
+    React.useEffect(() => {
+      const loadDevices = async () => {
+        try {
+          const { initDatabase } = await import('../../database/schema');
+          const { getDevicesByPond } = await import('../../database/deviceService');
+          initDatabase();
+          if (pondId) {
+            const dbDevices = await getDevicesByPond(pondId);
+            setDevices(dbDevices.map((d: any) => ({
+              id: d.id,
+              name: d.name,
+              isActive: d.status === 'active',
+            })));
+          }
+        } catch (e) {
+          // Handle error
+        }
+      };
+      loadDevices();
+    }, [pondId]);
   const [activeTab, setActiveTab] = useState<'perangkat' | 'pangan'>('perangkat');
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
@@ -61,8 +80,14 @@ const DaftarPerangkat: React.FC<DaftarPerangkatProps> = ({
 
   const handleAddDevice = () => navigation.navigate('CariPerangkat');
 
-  const handleDeleteDevice = (id: number) => {
-    setDevices((prev) => prev.filter((device) => device.id !== id));
+  const handleDeleteDevice = async (id: number) => {
+    try {
+      const { deleteDevice } = await import('../../database/deviceService');
+      await deleteDevice(id);
+      setDevices((prev) => prev.filter((device) => device.id !== id));
+    } catch (e) {
+      // Handle error
+    }
     setConfirmDeleteVisible(false);
     setDeleteId(null);
   };

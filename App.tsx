@@ -1,3 +1,8 @@
+// Tambahkan import seedAll untuk pengisian data dummy
+if (__DEV__) {
+  import('./src/database/schema').then(({ initDatabase }) => initDatabase());
+  import('./src/database/seedAll').then(({ seedAll }) => seedAll());
+}
 import 'react-native-gesture-handler';
 import React from 'react';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
